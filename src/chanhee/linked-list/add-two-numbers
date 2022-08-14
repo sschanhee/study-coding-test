@@ -1,0 +1,38 @@
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} l1
+ * @param {ListNode} l2
+ * @return {ListNode}
+ */
+var addTwoNumbers = function (l1, l2) {
+  let pointer1 = l1;
+  let pointer2 = l2;
+  const resStart = new ListNode();
+  let resPointer = resStart;
+  let carry = 0;
+  let isStart = true;
+  do {
+    if (!isStart) {
+      pointer1 = pointer1?.next;
+      pointer2 = pointer2?.next;
+      resPointer.next = new ListNode();
+      resPointer = resPointer.next;
+    }
+    const sum = (pointer1?.val ?? 0) + (pointer2?.val ?? 0) + carry;
+    if (sum >= 10) {
+      resPointer.val = sum - 10;
+      carry = 1;
+    } else {
+      resPointer.val = sum;
+      carry = 0;
+    }
+    isStart = false;
+  } while (pointer1?.next || pointer2?.next || carry === 1);
+  return resStart;
+};
