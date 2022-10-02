@@ -1,0 +1,82 @@
+function maxSlidingWindow(nums: number[], k: number): number[] {
+  // helper function declarations
+  function swap(nums: number[], firstIdx: number, secondIdx: number) {
+    const temp = nums[firstIdx];
+    nums[firstIdx] = nums[secondIdx];
+    nums[secondIdx] = temp;
+  }
+
+  function maxHeapify(values: number[], heap: number[], nodeIdx: number) {
+    const n = heap.length;
+    const leftChildIdx = nodeIdx * 2 + 1;
+    const rightChildIdx = nodeIdx * 2 + 2;
+    const max = Math.max(
+      values[heap[nodeIdx]],
+      ...(leftChildIdx < n ? [values[heap[leftChildIdx]]] : []),
+      ...(rightChildIdx < n ? [values[heap[rightChildIdx]]] : [])
+    );
+    if (max === values[heap[nodeIdx]]) {
+      return;
+    }
+    if (max === values[heap[leftChildIdx]]) {
+      swap(heap, nodeIdx, leftChildIdx);
+      maxHeapify(values, heap, leftChildIdx);
+    } else if (max === values[heap[rightChildIdx]]) {
+      swap(heap, nodeIdx, rightChildIdx);
+      maxHeapify(values, heap, rightChildIdx);
+    }
+  }
+
+  function buildMaxHeap(nums: number[]) {
+    const n = nums.length;
+    const heap = [...Array(n).keys()];
+    const lastNonLeafIdx = Math.floor(n / 2) - 1;
+    for (let i = lastNonLeafIdx; i >= 0; i--) {
+      maxHeapify(nums, heap, i);
+    }
+    return heap;
+  }
+
+  function bottomUpMaxHeapify(
+    values: number[],
+    heap: number[],
+    nodeIdx: number
+  ) {
+    if (nodeIdx <= 0) {
+      return;
+    }
+    const parentIdx = Math.floor((nodeIdx - 1) / 2);
+    if (values[heap[parentIdx]] >= values[heap[nodeIdx]]) {
+      return;
+    }
+    swap(heap, parentIdx, nodeIdx);
+    bottomUpMaxHeapify(values, heap, parentIdx);
+  }
+
+  function insertToMaxHeap(values: number[], heap: number[], newIdx: number) {
+    heap.push(newIdx);
+    bottomUpMaxHeapify(values, heap, heap.length - 1);
+    return heap;
+  }
+
+  function pop(values: number[], heap: number[]) {
+    const head = heap[0];
+    heap[0] = heap[heap.length - 1];
+    heap.pop();
+    maxHeapify(values, heap, 0);
+    return head;
+  }
+
+  // solution funciton implementation
+  const res: number[] = [];
+  let heap = buildMaxHeap(nums.slice(0, k));
+  res.push(nums[heap[0]]);
+  for (let i = k; i < nums.length; i++) {
+    heap = insertToMaxHeap(nums, heap, i);
+    while (heap[0] < i - k + 1) {
+      pop(nums, heap);
+    }
+    res.push(nums[heap[0]]);
+  }
+  return res;
+}
